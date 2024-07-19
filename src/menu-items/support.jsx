@@ -16,14 +16,14 @@ const support = {
   children: [
     {
       id: 'sample-page',
-      title: 'Sample Page',
+      title: 'Settings',
       type: 'item',
       url: '/sample-page',
       icon: icons.ChromeOutlined
     },
     {
       id: 'documentation',
-      title: 'Documentation',
+      title: 'Message',
       type: 'item',
       url: '#',
       icon: icons.QuestionOutlined,

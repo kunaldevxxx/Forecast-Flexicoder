@@ -1,6 +1,7 @@
 // material-ui
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
@@ -10,16 +11,15 @@ import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 
 // project import
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import MonthlyBarChart from './MonthlyBarChart';
-import ReportAreaChart from './ReportAreaChart';
-import UniqueVisitorCard from './UniqueVisitorCard';
-import SaleReportCard from './SaleReportCard';
 import OrdersTable from './OrdersTable';
+import ReportAreaChart from './ReportAreaChart';
+import SaleReportCard from './SaleReportCard';
+import UniqueVisitorCard from './UniqueVisitorCard';
 
 // assets
 import GiftOutlined from '@ant-design/icons/GiftOutlined';
@@ -189,7 +189,7 @@ export default function DashboardDefault() {
   <Grid item xs={12} md={4} sx={{ mt: 2 }}>
     <Grid container alignItems="center" justifyContent="space-between">
       <Grid item>
-        <Typography variant="h5">Income Overview</Typography>
+        <Typography variant="h5">Return Risk Analysis</Typography>
       </Grid>
       <Grid item />
     </Grid>
@@ -197,9 +197,9 @@ export default function DashboardDefault() {
       <Box sx={{ p: 3, pb: 0 }}>
         <Stack spacing={2}>
           <Typography variant="h6" color="text.secondary">
-            This Week Statistics
+            This Week Return Value
           </Typography>
-          <Typography variant="h3">$7,650</Typography>
+          <Typography variant="h3">$765</Typography>
         </Stack>
       </Box>
       <MonthlyBarChart />
@@ -208,25 +208,12 @@ export default function DashboardDefault() {
   <Grid item xs={12} md={4} sx={{ mt: 2 }}>
     <Grid container alignItems="center" justifyContent="space-between">
       <Grid item>
-        <Typography variant="h5">Analytics Report</Typography>
+        <Typography variant="h5">Customer Sentiment Analysis</Typography>
       </Grid>
       <Grid item />
     </Grid>
     <MainCard sx={{ mt: 2 }} content={false}>
-      <List sx={{ p: 0, '& .MuiListItemButton-root': { py: 2 } }}>
-        <ListItemButton divider>
-          <ListItemText primary="Company Finance Growth" />
-          <Typography variant="h5">+45.14%</Typography>
-        </ListItemButton>
-        <ListItemButton divider>
-          <ListItemText primary="Company Expenses Ratio" />
-          <Typography variant="h5">0.58%</Typography>
-        </ListItemButton>
-        <ListItemButton>
-          <ListItemText primary="Business Risk Cases" />
-          <Typography variant="h5">Low</Typography>
-        </ListItemButton>
-      </List>
+      
       <ReportAreaChart />
     </MainCard>
   </Grid>
