@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
 // material-ui
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 
 // project import
 import MainCard from 'components/MainCard';
@@ -20,7 +20,7 @@ export default function UniqueVisitorCard() {
     <>
       <Grid container alignItems="center" justifyContent="space-between">
         <Grid item>
-          <Typography variant="h5">Unique Visitor</Typography>
+          <Typography variant="h5">Sales Report</Typography>
         </Grid>
         <Grid item>
           <Stack direction="row" alignItems="center" spacing={0}>
@@ -40,6 +40,15 @@ export default function UniqueVisitorCard() {
             >
               Week
             </Button>
+            <Button
+              size="small"
+              onClick={() => setSlot('year')}
+              color={slot === 'year' ? 'primary' : 'secondary'}
+              variant={slot === 'year' ? 'outlined' : 'text'}
+            >
+              Year
+            </Button>
+            
           </Stack>
         </Grid>
       </Grid>
