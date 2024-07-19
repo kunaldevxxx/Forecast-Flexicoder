@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -18,6 +18,8 @@ import Box from '@mui/material/Box';
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // project import
 import AnimateButton from 'components/@extended/AnimateButton';
@@ -32,6 +34,9 @@ import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 export default function AuthRegister() {
   const [level, setLevel] = useState();
   const [showPassword, setShowPassword] = useState(false);
+  const [apiError, setApiError] = useState(null); // State for API errors
+  const navigate = useNavigate(); // Hook for navigation
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -49,6 +54,38 @@ export default function AuthRegister() {
     changePassword('');
   }, []);
 
+  const handleSubmit = async (values, { setSubmitting, setErrors }) => {
+    try {
+      const response = await fetch('https://forecasting-kfs8.onrender.com/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: `${values.firstname} ${values.lastname}`,
+          email: values.email,
+          password: values.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+
+      toast.success('User registered successfully');
+      navigate('/login'); // Redirect to /login on success
+
+    } catch (error) {
+      toast.error(error.message);
+      setApiError(error.message);
+      setErrors({ submit: error.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <>
       <Formik
@@ -56,7 +93,6 @@ export default function AuthRegister() {
           firstname: '',
           lastname: '',
           email: '',
-          company: '',
           password: '',
           submit: null
         }}
@@ -66,6 +102,7 @@ export default function AuthRegister() {
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string().max(255).required('Password is required')
         })}
+        onSubmit={handleSubmit}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit}>
@@ -74,8 +111,8 @@ export default function AuthRegister() {
                 <Stack spacing={1}>
                   <InputLabel htmlFor="firstname-signup">First Name*</InputLabel>
                   <OutlinedInput
-                    id="firstname-login"
-                    type="firstname"
+                    id="firstname-signup"
+                    type="text"
                     value={values.firstname}
                     name="firstname"
                     onBlur={handleBlur}
@@ -98,13 +135,12 @@ export default function AuthRegister() {
                     fullWidth
                     error={Boolean(touched.lastname && errors.lastname)}
                     id="lastname-signup"
-                    type="lastname"
+                    type="text"
                     value={values.lastname}
                     name="lastname"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     placeholder="Doe"
-                    inputProps={{}}
                   />
                 </Stack>
                 {touched.lastname && errors.lastname && (
@@ -113,41 +149,20 @@ export default function AuthRegister() {
                   </FormHelperText>
                 )}
               </Grid>
-              <Grid item xs={12}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="company-signup">Company</InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    error={Boolean(touched.company && errors.company)}
-                    id="company-signup"
-                    value={values.company}
-                    name="company"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    placeholder="Demo Inc."
-                    inputProps={{}}
-                  />
-                </Stack>
-                {touched.company && errors.company && (
-                  <FormHelperText error id="helper-text-company-signup">
-                    {errors.company}
-                  </FormHelperText>
-                )}
-              </Grid>
+             
               <Grid item xs={12}>
                 <Stack spacing={1}>
                   <InputLabel htmlFor="email-signup">Email Address*</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.email && errors.email)}
-                    id="email-login"
+                    id="email-signup"
                     type="email"
                     value={values.email}
                     name="email"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     placeholder="demo@company.com"
-                    inputProps={{}}
                   />
                 </Stack>
                 {touched.email && errors.email && (
@@ -185,7 +200,6 @@ export default function AuthRegister() {
                       </InputAdornment>
                     }
                     placeholder="******"
-                    inputProps={{}}
                   />
                 </Stack>
                 {touched.password && errors.password && (
@@ -223,6 +237,11 @@ export default function AuthRegister() {
                   <FormHelperText error>{errors.submit}</FormHelperText>
                 </Grid>
               )}
+              {apiError && (
+                <Grid item xs={12}>
+                  <FormHelperText error>{apiError}</FormHelperText>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <AnimateButton>
                   <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
@@ -234,6 +253,8 @@ export default function AuthRegister() {
           </form>
         )}
       </Formik>
+      {/* Toast Container for notifications */}
+      <ToastContainer />
     </>
   );
 }

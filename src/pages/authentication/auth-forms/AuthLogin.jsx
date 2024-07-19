@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -33,14 +34,43 @@ import FirebaseSocial from './FirebaseSocial';
 
 export default function AuthLogin({ isDemo = false }) {
   const [checked, setChecked] = React.useState(false);
-
   const [showPassword, setShowPassword] = React.useState(false);
+  const navigate = useNavigate(); // Use the navigate hook
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
+  };
+
+  const handleSubmit = async (values, { setSubmitting, setErrors }) => {
+    try {
+      const response = await axios.post('https://forecasting-kfs8.onrender.com/signin', {
+        email: values.email,
+        password: values.password,
+      });
+
+      // Check if response is okay
+      if (response.status === 200 && response.data.token) {
+        // Store JWT in local storage
+        localStorage.setItem('jwt', response.data.token);
+
+        // Redirect to /free
+        navigate('/');
+      } else {
+        setErrors({ submit: 'Login failed. Please try again.' });
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setErrors({ submit: error.response.data.message || 'An error occurred' });
+      } else {
+        setErrors({ submit: 'An error occurred' });
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -55,6 +85,7 @@ export default function AuthLogin({ isDemo = false }) {
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string().max(255).required('Password is required')
         })}
+        onSubmit={handleSubmit}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit}>
@@ -86,7 +117,7 @@ export default function AuthLogin({ isDemo = false }) {
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.password && errors.password)}
-                    id="-password-login"
+                    id="password-login"
                     type={showPassword ? 'text' : 'password'}
                     value={values.password}
                     name="password"
