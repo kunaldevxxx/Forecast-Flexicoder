@@ -22,10 +22,10 @@ const MainRoutes = {
       path: '/',
       element: <DashboardDefault />
     },
-    {
-      path: 'color',
-      element: <Color />
-    },
+    // {
+    //   path: 'color',
+    //   element: <Color />
+    // },
     {
       path: 'dashboard',
       children: [
@@ -35,18 +35,18 @@ const MainRoutes = {
         }
       ]
     },
-    {
-      path: 'sample-page',
-      element: <SamplePage />
-    },
-    {
-      path: 'shadow',
-      element: <Shadow />
-    },
-    {
-      path: 'typography',
-      element: <Typography />
-    }
+    // {
+    //   path: 'sample-page',
+    //   element: <SamplePage />
+    // },
+    // {
+    //   path: 'shadow',
+    //   element: <Shadow />
+    // },
+    // {
+    //   path: 'typography',
+    //   element: <Typography />
+    // }
   ]
 };
 

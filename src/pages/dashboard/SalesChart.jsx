@@ -169,7 +169,13 @@ export default function SalesChart() {
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack spacing={1.5}>
             <Typography variant="h6" color="secondary">
-              Net Profit
+              Targetted Sale
+            </Typography>
+            <Typography variant="h4">$1560</Typography>
+          </Stack>
+          <Stack spacing={1.5}>
+            <Typography variant="h6" color="secondary">
+              Reality Sale
             </Typography>
             <Typography variant="h4">$1560</Typography>
           </Stack>
