@@ -7,6 +7,8 @@ import {
   FontSizeOutlined,
   LoadingOutlined
 } from '@ant-design/icons';
+import { FcBarChart, FcFactory, FcPaid, FcSalesPerformance, FcStackOfPhotos, FcStatistics } from "react-icons/fc";
+
 
 // icons
 const icons = {
@@ -15,14 +17,20 @@ const icons = {
   BarcodeOutlined,
   AntDesignOutlined,
   LoadingOutlined,
-  AppstoreAddOutlined
+  AppstoreAddOutlined,
+  FcSalesPerformance,
+  FcStackOfPhotos,
+  FcStatistics,
+ FcBarChart,
+ FcFactory,
+ FcPaid
 };
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
 
 const utilities = {
   id: 'utilities',
-  title: 'Utilities',
+  title: 'Features',
   type: 'group',
   children: [
     {
@@ -30,56 +38,56 @@ const utilities = {
       title: 'Sales Forecasting  ',
       type: 'item',
       url: '/typography',
-      icon: icons.FontSizeOutlined
+      icon: icons.FcSalesPerformance
     },
     {
       id: 'util-color',
       title: 'Products',
       type: 'item',
       url: '/color',
-      icon: icons.BgColorsOutlined
+      icon: icons.BarcodeOutlined
     },
     {
       id: 'util-shadow',
-      title: 'Orders Table',
+      title: 'Top Product',
       type: 'item',
       url: '/TopProduct',
-      icon: icons.BarcodeOutlined
+      icon: icons.FcStackOfPhotos
     },
     {
       id: 'util-report',
       title: 'Sales Report',
       type: 'item',
       url: '/UniqueVisitorCard',
-      icon: icons.BarcodeOutlined
+      icon: icons.FcStatistics
     },
     {
       id: 'util-bar',
-      title: 'Monthly Bar Chart',
+      title: 'Return Risk Analysis',
       type: 'item',
       url: '/MonthlyBarChart',
-      icon: icons.BarcodeOutlined
+      icon: icons.FcBarChart
     },
     {
       id: 'util-Area',
-      title: 'Report Area Chart',
+      title: 'Customer Sentiment Analysis',
       type: 'item',
       url: '/ReportArea',
-      icon: icons.BarcodeOutlined
+      icon: icons.FcBarChart
     },
     {
       id: 'util-Target',
       title: 'Target vs Reality',
       type: 'item',
       url: '/Saleschart',
-      icon: icons.BarcodeOutlined
+      icon: icons.FcPaid
     },
     {
       id: 'util-shadow',
       title: 'Manage Inventory',
       type: 'item',
       url: '/shadow',
-      icon: icons.BarcodeOutlined
+      icon: icons.FcFactory
     }
   ]
 };
