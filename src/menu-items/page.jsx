@@ -1,10 +1,15 @@
 // assets
 import { LoginOutlined, ProfileOutlined } from '@ant-design/icons';
+import { FcAddDatabase, FcBusinessman } from "react-icons/fc";
+
+
 
 // icons
 const icons = {
   LoginOutlined,
-  ProfileOutlined
+  ProfileOutlined,
+  FcBusinessman,
+  FcAddDatabase
 };
 
 // ==============================|| MENU ITEMS - EXTRA PAGES ||============================== //
@@ -19,7 +24,7 @@ const pages = {
       title: 'Login',
       type: 'item',
       url: '/login',
-      icon: icons.LoginOutlined,
+      icon: icons.FcBusinessman,
       target: true
     },
     {
@@ -27,7 +32,7 @@ const pages = {
       title: 'Register',
       type: 'item',
       url: '/register',
-      icon: icons.ProfileOutlined,
+      icon: icons.FcAddDatabase,
       target: true
     }
   ]
