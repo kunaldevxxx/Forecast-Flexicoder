@@ -9,8 +9,8 @@ import {
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import MonthlyBarChart from './MonthlyBarChart';
-import OrdersTable from './OrdersTable';
-import ReportAreaChart from './ReportAreaChart';
+// import OrdersTable from './OrdersTable';
+// import ReportAreaChart from './ReportAreaChart';
 import SaleReportCard from './SaleReportCard';
 import UniqueVisitorCard from './UniqueVisitorCard';
 import GiftOutlined from '@ant-design/icons/GiftOutlined';
@@ -20,6 +20,9 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 import avatar2 from 'assets/images/users/avatar-2.png';
 import avatar3 from 'assets/images/users/avatar-3.png';
 import avatar4 from 'assets/images/users/avatar-4.png';
+import TopProduct from './TopProduct';
+import ReportArea from './ReportArea';
+import { px } from 'framer-motion';
 
 const avatarSX = {
   width: 36,
@@ -157,16 +160,9 @@ export default function DashboardDefault() {
 
       <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />
       <Grid container spacing={2}>
-        {/* Top Products Section */}
-        <Grid item xs={12} sm={4}>
-          <MainCard sx={{ height: '100%', display: 'flex', mt: 2, flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Typography variant="h5" gutterBottom>
-              Top Products
-            </Typography>
-            <OrdersTable />
-          </MainCard>
-        </Grid>
 
+        {/* Top Products Section */}
+        <TopProduct></TopProduct>
         {/* Transaction History Section */}
         <Grid item xs={12} sm={4}>
           <MainCard sx={{ height: '100%', mt: 2, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -266,39 +262,15 @@ export default function DashboardDefault() {
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
 
       {/* row 2 */}
-      <Grid container spacing={2}>
+      <Grid container spacing={4} mt="8px">
         <Grid item xs={12} md={4} sx={{ mt: 2 }}>
           <UniqueVisitorCard />
         </Grid>
         <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
-              <Typography variant="h5">Return Risk Analysis</Typography>
-            </Grid>
-            <Grid item />
-          </Grid>
-          <MainCard sx={{ mt: 2 }} content={false}>
-            <Box sx={{ p: 3, pb: 0 }}>
-              <Stack spacing={2}>
-                <Typography variant="h6" color="text.secondary">
-                  This Week Return Value
-                </Typography>
-                <Typography variant="h3">$765</Typography>
-              </Stack>
-            </Box>
-            <MonthlyBarChart salesData={salesData} />
-          </MainCard>
+          <MonthlyBarChart></MonthlyBarChart>
         </Grid>
         <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
-              <Typography variant="h5">Customer Sentiment Analysis</Typography>
-            </Grid>
-            <Grid item />
-          </Grid>
-          <MainCard sx={{ mt: 2 }} content={false}>
-            <ReportAreaChart />
-          </MainCard>
+          <ReportArea></ReportArea>
         </Grid>
       </Grid>
 
