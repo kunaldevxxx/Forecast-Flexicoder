@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
+
+// material-ui
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+
+// third-party
 import ReactApexChart from 'react-apexcharts';
 import axios from 'axios';
 
@@ -150,9 +154,29 @@ export default function MonthlyBarChart() {
     });
   }, [theme]);
 
-  return (
-    <Box id="chart" sx={{ bgcolor: 'transparent' }}>
-      <ReactApexChart options={options} series={series} type="bar" height={365} />
-    </Box>
+  return (<>
+
+    
+      <Grid container alignItems="center" justifyContent="space-between">
+        <Grid item>
+          <Typography variant="h5">Return Risk Analysis</Typography>
+        </Grid>
+        <Grid item />
+      </Grid>
+      <MainCard sx={{ mt: 2 }} content={false}>
+        <Box sx={{ p: 3, pb: 0 }}>
+          <Stack spacing={2}>
+            <Typography variant="h6" color="text.secondary">
+              This Week Return Value
+            </Typography>
+            <Typography variant="h3">$765</Typography>
+          </Stack>
+        </Box>
+        <Box id="chart" sx={{ bgcolor: 'transparent' }}>
+          <ReactApexChart options={options} series={series} type="bar" height={365} />
+        </Box>
+      </MainCard>
+
+  </>
   );
 }
