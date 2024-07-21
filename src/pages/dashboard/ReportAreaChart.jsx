@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import ReactApexChart from 'react-apexcharts';
 import axios from 'axios';
-import { Grid, FormControl, InputLabel, Select, MenuItem, Badge } from '@mui/material';
+import { Grid, FormControl, InputLabel, Select, MenuItem, Badge, Box, Typography } from '@mui/material';
 
 // chart options
 const areaChartOptions = {
@@ -146,11 +146,13 @@ export default function ReportAreaChart() {
           <ReactApexChart options={options} series={series} type="line" height={340} />
         </Grid>
         <Grid item xs={12}>
-          {sentimentData.map((data, index) => (
-            <Badge key={index} badgeContent={`${(data.y * 100).toFixed(0)}%`} color={data.y > 0.5 ? "primary" : "secondary"}>
-              {data.x}
-            </Badge>
-          ))}
+          <Box display="flex" flexWrap="wrap" justifyContent="space-around">
+            {sentimentData.map((data, index) => (
+              <Badge key={index} badgeContent={`${(data.y * 100).toFixed(0)}%`} color={data.y > 0.5 ? "primary" : "secondary"}>
+                <Typography variant="body2">{data.x}</Typography>
+              </Badge>
+            ))}
+          </Box>
         </Grid>
       </Grid>
     </div>
