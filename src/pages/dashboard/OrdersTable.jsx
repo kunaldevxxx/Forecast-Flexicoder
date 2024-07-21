@@ -1,96 +1,86 @@
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 // material-ui
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box } from '@mui/material';
 // third-party
 import { NumericFormat } from 'react-number-format';
+import axios from 'axios';
 
-// project import
-import Dot from 'components/@extended/Dot';
+// ==============================|| API FETCH AND DATA MANAGEMENT ||============================== //
 
-function createData(tracking_no, name, fat, carbs, protein) {
-  return { tracking_no, name, fat, carbs, protein };
-}
-
-const rows = [
-  createData(84564564, 'Camera Lens', 40, 2, 40570),
-  createData(98764564, 'Laptop', 300, 0, 180139),
-  createData(98756325, 'Mobile', 355, 1, 90989),
-  createData(98652366, 'Handset', 50, 1, 10239)
-];
-
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
+const fetchSalesData = async (token) => {
+  try {
+    const response = await axios.get('https://forecasting-kfs8.onrender.com/sales', {
+      headers: {
+        'Authorization': `Bearer ${token}` // Set the Authorization header with the JWT token
+      }
+    });
+    // Sorting by quantitySold and picking top 5
+    return response.data.sales.sort((a, b) => b.quantitySold - a.quantitySold).slice(0, 5);
+  } catch (error) {
+    console.error('Failed to fetch sales data:', error);
+    return [];
   }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
+};
+
+const fetchProductsData = async (token) => {
+  try {
+    const response = await axios.get('https://forecasting-kfs8.onrender.com/products', {
+      headers: {
+        'Authorization': `Bearer ${token}` // Set the Authorization header with the JWT token
+      }
+    });
+    return response.data.products;
+  } catch (error) {
+    console.error('Failed to fetch products data:', error);
+    return [];
   }
-  return 0;
-}
+};
 
-function getComparator(order, orderBy) {
-  return order === 'desc' ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy);
-}
+const fetchData = async () => {
+  const token = localStorage.getItem('jwt'); // Fetch the JWT token from local storage
 
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
+  if (!token) {
+    console.error('No token found');
+    return [];
+  }
+
+  const [salesData, productsData] = await Promise.all([fetchSalesData(token), fetchProductsData(token)]);
+
+  // Create a mapping of product IDs to product names
+  const productMap = productsData.reduce((map, product) => {
+    map[product.id] = product.name;
+    return map;
+  }, {});
+
+  // Map product IDs to product names in the sales data
+  const salesDataWithProductNames = salesData.map(sale => ({
+    ...sale,
+    productName: productMap[sale.productId]
+  }));
+
+  // Combine sales data with the same product name
+  const combinedSalesData = salesDataWithProductNames.reduce((acc, sale) => {
+    const existingProduct = acc.find(item => item.productName === sale.productName);
+    if (existingProduct) {
+      existingProduct.quantitySold += sale.quantitySold;
+    } else {
+      acc.push(sale);
     }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
+    return acc;
+  }, []);
 
-const headCells = [
-  {
-    id: 'tracking_no',
-    align: 'left',
-    disablePadding: false,
-    label: 'Tracking No.'
-  },
-  {
-    id: 'name',
-    align: 'left',
-    disablePadding: true,
-    label: 'Product Name'
-  },
-  {
-    id: 'fat',
-    align: 'right',
-    disablePadding: false,
-    label: 'Total Order'
-  },
-  {
-    id: 'carbs',
-    align: 'left',
-    disablePadding: false,
-
-    label: 'Status'
-  },
-  {
-    id: 'protein',
-    align: 'right',
-    disablePadding: false,
-    label: 'Total Amount'
-  }
-];
+  return combinedSalesData;
+};
 
 // ==============================|| ORDER TABLE - HEADER ||============================== //
 
-function OrderTableHead({ order, orderBy }) {
+const headCells = [
+  { id: 'productName', align: 'left', disablePadding: true, label: 'Product Name' },
+  { id: 'quantitySold', align: 'right', disablePadding: false, label: 'Quantity Sold' }
+];
+
+function OrderTableHead() {
   return (
     <TableHead>
       <TableRow>
@@ -99,7 +89,6 @@ function OrderTableHead({ order, orderBy }) {
             key={headCell.id}
             align={headCell.align}
             padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={orderBy === headCell.id ? order : false}
           >
             {headCell.label}
           </TableCell>
@@ -109,41 +98,14 @@ function OrderTableHead({ order, orderBy }) {
   );
 }
 
-function OrderStatus({ status }) {
-  let color;
-  let title;
-
-  switch (status) {
-    case 0:
-      color = 'warning';
-      title = 'Pending';
-      break;
-    case 1:
-      color = 'success';
-      title = 'Approved';
-      break;
-    case 2:
-      color = 'error';
-      title = 'Rejected';
-      break;
-    default:
-      color = 'primary';
-      title = 'None';
-  }
-
-  return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      <Dot color={color} />
-      <Typography>{title}</Typography>
-    </Stack>
-  );
-}
-
 // ==============================|| ORDER TABLE ||============================== //
 
 export default function OrderTable() {
-  const order = 'asc';
-  const orderBy = 'tracking_no';
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    fetchData().then(setRows);
+  }, []);
 
   return (
     <Box>
@@ -158,33 +120,21 @@ export default function OrderTable() {
         }}
       >
         <Table aria-labelledby="tableTitle">
-          <OrderTableHead order={order} orderBy={orderBy} />
+          <OrderTableHead />
           <TableBody>
-            {stableSort(rows, getComparator(order, orderBy)).map((row, index) => {
-              const labelId = `enhanced-table-checkbox-${index}`;
-
-              return (
-                <TableRow
-                  hover
-                  role="checkbox"
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  tabIndex={-1}
-                  key={row.tracking_no}
-                >
-                  <TableCell component="th" id={labelId} scope="row">
-                    <Link color="secondary"> {row.tracking_no}</Link>
-                  </TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell align="right">{row.fat}</TableCell>
-                  <TableCell>
-                    <OrderStatus status={row.carbs} />
-                  </TableCell>
-                  <TableCell align="right">
-                    <NumericFormat value={row.protein} displayType="text" thousandSeparator prefix="$" />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {rows.map((row) => (
+              <TableRow
+                hover
+                role="checkbox"
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                tabIndex={-1}
+                key={row.id}
+              >
+                <TableCell>{row.productName}</TableCell>
+                <TableCell align="right">{row.quantitySold}</TableCell>
+                {/* <TableCell>{new Date(row.salesDate).toLocaleDateString()}</TableCell> */}
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
@@ -192,6 +142,7 @@ export default function OrderTable() {
   );
 }
 
-OrderTableHead.propTypes = { order: PropTypes.any, orderBy: PropTypes.string };
-
-OrderStatus.propTypes = { status: PropTypes.number };
+OrderTableHead.propTypes = {
+  order: PropTypes.any,
+  orderBy: PropTypes.string
+};

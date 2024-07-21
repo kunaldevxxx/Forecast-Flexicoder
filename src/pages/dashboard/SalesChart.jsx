@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -41,11 +42,11 @@ const columnChartOptions = {
     colors: ['transparent']
   },
   xaxis: {
-    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+    categories: [] // Placeholder for product names
   },
   yaxis: {
     title: {
-      text: '$ (thousands)'
+      text: 'QTY'
     }
   },
   fill: {
@@ -54,7 +55,7 @@ const columnChartOptions = {
   tooltip: {
     y: {
       formatter(val) {
-        return `$ ${val} thousands`;
+        return `${val} `;
       }
     }
   },
@@ -75,12 +76,12 @@ const columnChartOptions = {
 
 const initialSeries = [
   {
-    name: 'Income',
-    data: [180, 90, 135, 114, 120, 145]
+    name: 'Current Stock',
+    data: [0, 0, 0, 0, 0, 0] // initial data placeholder
   },
   {
-    name: 'Cost Of Sales',
-    data: [120, 45, 78, 150, 168, 99]
+    name: 'Stock',
+    data: [0, 0, 0, 0, 0, 0] // initial data placeholder
   }
 ];
 
@@ -88,22 +89,20 @@ const initialSeries = [
 
 export default function SalesChart() {
   const theme = useTheme();
-
   const [legend, setLegend] = useState({
-    income: true,
-    cos: true
+    currentStock: true,
+    stock: true
   });
-
-  const { income, cos } = legend;
-
+  const { currentStock, stock } = legend;
   const { primary, secondary } = theme.palette.text;
   const line = theme.palette.divider;
-
   const warning = theme.palette.warning.main;
   const primaryMain = theme.palette.primary.main;
   const successDark = theme.palette.success.dark;
-
   const [series, setSeries] = useState(initialSeries);
+  const [targetedSaleQty, setTargetedSaleQty] = useState(0);
+  const [realitySaleQty, setRealitySaleQty] = useState(0);
+  const [productNames, setProductNames] = useState([]); // New state for product names
 
   const handleLegendChange = (event) => {
     setLegend({ ...legend, [event.target.name]: event.target.checked });
@@ -113,35 +112,89 @@ export default function SalesChart() {
   const [options, setOptions] = useState(columnChartOptions);
 
   useEffect(() => {
-    if (income && cos) {
-      setSeries(initialSeries);
-    } else if (income) {
+    const token = localStorage.getItem('jwt');
+    const headers = {
+      Authorization: `Bearer ${token}`
+    };
+
+    const fetchData = async () => {
+      try {
+        const stockResponse = await axios.get('https://forecasting-kfs8.onrender.com/stock', { headers });
+        const salesResponse = await axios.get('https://forecasting-kfs8.onrender.com/salename', { headers });
+        console.log(salesResponse.data, stockResponse.data);
+
+        const stockData = stockResponse.data.stockByProduct;
+        const salesData = salesResponse.data.salesByProduct;
+
+        const currentStockData = stockData.map(item => item.totalQuantity);
+        const stockDataSold = salesData.map(item => item.totalQuantitySold);
+        const productNames = stockData.map(item => item.productName); // Extract product names
+
+        // Calculate targeted and reality sale quantities
+        const targetedSaleQuantity = stockData.reduce((acc, item) => acc + item.totalQuantity, 0);
+        const realitySaleQuantity = salesData.reduce((acc, item) => acc + item.totalQuantitySold, 0);
+
+        setTargetedSaleQty(targetedSaleQuantity);
+        setRealitySaleQty(realitySaleQuantity);
+        setProductNames(productNames); // Set product names
+
+        setSeries([
+          {
+            name: 'Current Stock',
+            data: currentStockData
+          },
+          {
+            name: 'Stock',
+            data: stockDataSold
+          }
+        ]);
+
+        // Update chart options with product names as categories
+        setOptions(prevState => ({
+          ...prevState,
+          xaxis: {
+            ...prevState.xaxis,
+            categories: productNames
+          }
+        }));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (currentStock && stock) {
+      setSeries(series);
+    } else if (currentStock) {
       setSeries([
         {
-          name: 'Income',
-          data: [180, 90, 135, 114, 120, 145]
+          name: 'Current Stock',
+          data: series[0].data
         }
       ]);
-    } else if (cos) {
+    } else if (stock) {
       setSeries([
         {
-          name: 'Cost Of Sales',
-          data: [120, 45, 78, 150, 168, 99]
+          name: 'Stock',
+          data: series[1].data
         }
       ]);
     } else {
       setSeries([]);
     }
-  }, [income, cos]);
+  }, [currentStock, stock, series]);
 
   useEffect(() => {
     setOptions((prevState) => ({
       ...prevState,
-      colors: !(income && cos) && cos ? [primaryMain] : [warning, primaryMain],
+      colors: !(currentStock && stock) && stock ? [primaryMain] : [warning, primaryMain],
       xaxis: {
         labels: {
           style: {
-            colors: [secondary, secondary, secondary, secondary, secondary, secondary]
+            colors: Array(productNames.length).fill(secondary) // Use product names count for colors array
           }
         }
       },
@@ -161,7 +214,7 @@ export default function SalesChart() {
         }
       }
     }));
-  }, [primary, secondary, line, warning, primaryMain, successDark, income, cos, xsDown]);
+  }, [primary, secondary, line, warning, primaryMain, successDark, currentStock, stock, xsDown, productNames]);
 
   return (
     <MainCard sx={{ mt: 1 }} content={false}>
@@ -169,23 +222,23 @@ export default function SalesChart() {
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack spacing={1.5}>
             <Typography variant="h6" color="secondary">
-              Targetted Sale
+              Targeted Sale Quantity
             </Typography>
-            <Typography variant="h4">$1560</Typography>
+            <Typography variant="h4">{targetedSaleQty}</Typography>
           </Stack>
           <Stack spacing={1.5}>
             <Typography variant="h6" color="secondary">
-              Reality Sale
+              Reality Sale Quantity
             </Typography>
-            <Typography variant="h4">$1560</Typography>
+            <Typography variant="h4">{realitySaleQty}</Typography>
           </Stack>
           <FormControl component="fieldset">
             <FormGroup row>
               <FormControlLabel
-                control={<Checkbox color="warning" checked={income} onChange={handleLegendChange} name="income" />}
-                label="Income"
+                control={<Checkbox color="warning" checked={currentStock} onChange={handleLegendChange} name="currentStock" />}
+                label="Current Stock"
               />
-              <FormControlLabel control={<Checkbox checked={cos} onChange={handleLegendChange} name="cos" />} label="Cost of Sales" />
+              <FormControlLabel control={<Checkbox checked={stock} onChange={handleLegendChange} name="stock" />} label="Stock" />
             </FormGroup>
           </FormControl>
         </Stack>

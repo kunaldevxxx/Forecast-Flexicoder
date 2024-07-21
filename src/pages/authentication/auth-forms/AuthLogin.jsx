@@ -178,9 +178,9 @@ export default function AuthLogin({ isDemo = false }) {
                 </AnimateButton>
               </Grid>
               <Grid item xs={12}>
-                <Divider>
+                {/* <Divider>
                   <Typography variant="caption"> Login with</Typography>
-                </Divider>
+                </Divider> */}
               </Grid>
               <Grid item xs={12}>
                 <FirebaseSocial />

@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -50,9 +52,42 @@ function a11yProps(index) {
 
 export default function Profile() {
   const theme = useTheme();
-
+  const navigate = useNavigate(); // useNavigate hook for programmatic navigation
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(0);
+
+  // State to hold user data
+  const [user, setUser] = useState({ name: '', email: '' });
+  
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('jwt');
+      if (token) {
+        try {
+          const response = await fetch('https://forecasting-kfs8.onrender.com/user', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const data = await response.json();
+          if (data.users) {
+            setUser({
+              name: data.users.name,
+              email: data.users.email
+            });
+          }
+        } catch (error) {
+          console.error('Failed to fetch user data:', error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
@@ -64,7 +99,16 @@ export default function Profile() {
     setOpen(false);
   };
 
-  const [value, setValue] = useState(0);
+  const handleLogout = () => {
+    // Remove JWT token from localStorage
+    localStorage.removeItem('jwt');
+    
+    // Show toast notification
+    toast.success('Logged out successfully!');
+
+    // Redirect to login page
+    navigate('/login');
+  };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -91,7 +135,7 @@ export default function Profile() {
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ p: 0.5 }}>
           <Avatar alt="profile user" src={avatar1} size="sm" />
           <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
-            John Doe
+            {user.name || 'John Doe'}
           </Typography>
         </Stack>
       </ButtonBase>
@@ -124,16 +168,16 @@ export default function Profile() {
                         <Stack direction="row" spacing={1.25} alignItems="center">
                           <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                           <Stack>
-                            <Typography variant="h6">John Doe</Typography>
+                            <Typography variant="h6">{user.name || 'John Doe'}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                              UI/UX Designer
+                              {user.email || 'UI/UX Designer'}
                             </Typography>
                           </Stack>
                         </Stack>
                       </Grid>
                       <Grid item>
                         <Tooltip title="Logout">
-                          <IconButton size="large" sx={{ color: 'text.primary' }}>
+                          <IconButton size="large" sx={{ color: 'text.primary' }} onClick={handleLogout}>
                             <LogoutOutlined />
                           </IconButton>
                         </Tooltip>
