@@ -167,25 +167,25 @@ export default function SalesChart() {
 
   useEffect(() => {
     if (currentStock && stock) {
-      setSeries(series);
+      setSeries(initialSeries);
     } else if (currentStock) {
       setSeries([
         {
           name: 'Current Stock',
-          data: series[0].data
+          data: initialSeries[0].data
         }
       ]);
     } else if (stock) {
       setSeries([
         {
           name: 'Stock',
-          data: series[1].data
+          data: initialSeries[1].data
         }
       ]);
     } else {
       setSeries([]);
     }
-  }, [currentStock, stock, series]);
+  }, [currentStock, stock]);
 
   useEffect(() => {
     setOptions((prevState) => ({

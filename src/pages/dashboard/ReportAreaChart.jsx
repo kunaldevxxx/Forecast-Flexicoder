@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import ReactApexChart from 'react-apexcharts';
 import axios from 'axios';
-import { Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Grid, FormControl, InputLabel, Select, MenuItem, Badge } from '@mui/material';
 
 // chart options
 const areaChartOptions = {
@@ -32,7 +32,7 @@ const areaChartOptions = {
       show: false
     },
     axisTicks: {
-    show: false
+      show: false
     }
   },
   yaxis: {
@@ -53,8 +53,9 @@ export default function ReportAreaChart() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [series, setSeries] = useState([]);
   const [options, setOptions] = useState(areaChartOptions);
+  const [sentimentData, setSentimentData] = useState([]);
 
-  const jwtToken = localStorage.getItem('jwt'); // Get JWT token once and use it in all API requests
+  const jwtToken = localStorage.getItem('jwt');
 
   const fetchProducts = async () => {
     try {
@@ -82,6 +83,13 @@ export default function ReportAreaChart() {
         y: sale.totalQuantitySold
       }));
       setSeries([{ name: 'Sales', data: salesData }]);
+      
+      // Simulate sentiment data based on sales fluctuations
+      const sentimentScores = salesData.map(sale => ({
+        x: sale.x,
+        y: (sale.y > 1000 ? 0.8 : 0.2) // Example condition
+      }));
+      setSentimentData(sentimentScores);
     } catch (error) {
       console.error('Failed to fetch sales data:', error);
     }
@@ -99,43 +107,52 @@ export default function ReportAreaChart() {
 
   return (
     <div>
-       <Grid container spacing={2} marginTop={2} direction="column">
-      <Grid item xs={12}>
-        <FormControl fullWidth>
-          <InputLabel id="product-label">Product</InputLabel>
-          <Select
-            labelId="product-label"
-            value={selectedProduct}
-            label="Product"
-            onChange={(e) => setSelectedProduct(e.target.value)}
-          >
-            {products.map((product) => (
-              <MenuItem key={product.id} value={product.name}>
-                {product.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      <Grid container spacing={2} marginTop={2} direction="column">
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel id="product-label">Product</InputLabel>
+            <Select
+              labelId="product-label"
+              value={selectedProduct}
+              label="Product"
+              onChange={(e) => setSelectedProduct(e.target.value)}
+            >
+              {products.map((product) => (
+                <MenuItem key={product.id} value={product.name}>
+                  {product.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel id="year-label">Year</InputLabel>
+            <Select
+              labelId="year-label"
+              value={selectedYear}
+              label="Year"
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              {years.map(year => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <ReactApexChart options={options} series={series} type="line" height={340} />
+        </Grid>
+        <Grid item xs={12}>
+          {sentimentData.map((data, index) => (
+            <Badge key={index} badgeContent={`${(data.y * 100).toFixed(0)}%`} color={data.y > 0.5 ? "primary" : "secondary"}>
+              {data.x}
+            </Badge>
+          ))}
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <FormControl fullWidth>
-          <InputLabel id="year-label">Year</InputLabel>
-          <Select
-            labelId="year-label"
-            value={selectedYear}
-            label="Year"
-            onChange={(e) => setSelectedYear(e.target.value)}
-          >
-            {years.map(year => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-    </Grid>
-      <ReactApexChart options={options} series={series} type="line" height={340} />
     </div>
   );
 }

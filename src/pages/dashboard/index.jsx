@@ -39,55 +39,41 @@ const actionSX = {
 export default function DashboardDefault() {
   const [salesData, setSalesData] = useState([]);
   const [productsData, setProductsData] = useState([]);
+  const [totalInventoryValue, setTotalInventoryValue] = useState(0);
   const [stockData, setStockData] = useState([]);
-  const reorderThreshold = 10000; 
+  const reorderThresholdPercentage = 70; // Set threshold as a percentage
 
   useEffect(() => {
-    const fetchSalesData = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('jwt');
-        const response = await axios.get('https://forecasting-kfs8.onrender.com/sales', {
+        const config = {
           headers: { 'Authorization': `Bearer ${token}` }
-        });
-        setSalesData(response.data.sales);
+        };
+        const salesResponse = await axios.get('https://forecasting-kfs8.onrender.com/sales', config);
+        setSalesData(salesResponse.data.sales);
+
+        const productsResponse = await axios.get('https://forecasting-kfs8.onrender.com/products', config);
+        setProductsData(productsResponse.data.products);
+
+        const stockResponse = await axios.get('https://forecasting-kfs8.onrender.com/stock', config);
+        setStockData(stockResponse.data.products);
+
+        const inventoryResponse = await axios.get('https://forecasting-kfs8.onrender.com/inventory', config);
+        setTotalInventoryValue(inventoryResponse.data.totalInventoryValue.toFixed(2));  // Set total inventory value from API
+      
       } catch (error) {
-        console.error('Error fetching sales data:', error);
+        console.error('Error fetching data:', error);
       }
+      
     };
 
-    const fetchProductsData = async () => {
-      try {
-        const token = localStorage.getItem('jwt');
-        const response = await axios.get('https://forecasting-kfs8.onrender.com/products', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        setProductsData(response.data.products);
-      } catch (error) {
-        console.error('Error fetching products data:', error);
-      }
-    };
-
-    const fetchStockData = async () => {
-      try {
-        const token = localStorage.getItem('jwt');
-        const response = await axios.get('https://forecasting-kfs8.onrender.com/stock', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        setStockData(response.data.products);
-      } catch (error) {
-        console.error('Error fetching stock data:', error);
-      }
-    };
-
-    fetchSalesData();
-    fetchProductsData();
-    fetchStockData();
+    fetchData();
   }, []);
 
   const calculateTotalInventoryValue = () => {
     if (!productsData || productsData.length === 0) return '0.00';
-    return productsData.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity , 0).toFixed(2);
+    return productsData.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2);
   };
   
   const calculateTotalStockLevel = () => {
@@ -96,14 +82,31 @@ export default function DashboardDefault() {
   };
 
   const calculateStockRiskout = () => {
-    if (!productsData || productsData.length === 0) return 0;
-    const stockRiskoutProducts = productsData.filter(product => product.quantity < reorderThreshold);
-    return stockRiskoutProducts.length;
-  };
+    if (!productsData || productsData.length === 0) {
+        console.log('No products data available.');
+        return "No data";
+    }
+
+    const totalStock = calculateTotalStockLevel();
+    console.log(totalStock)
+    const averageStock = totalStock / productsData.length;
+    console.log(averageStock)
+    const thresholdQuantity = averageStock * (reorderThresholdPercentage / 100);
+    console.log(thresholdQuantity)
+    const riskyProducts = productsData.filter(product => product.quantity < thresholdQuantity);
+    console.log(riskyProducts)
+
+    // Constructing a string with names and counts
+    return riskyProducts.map(product => `${product.name}: ${product.quantity}`).join(', ');
+};
+
+
 
   const calculateReorderAlerts = () => {
     if (!productsData || productsData.length === 0) return 0;
-    return productsData.filter(product => product.quantity < reorderThreshold).length;
+    const averageStock = calculateTotalStockLevel() / productsData.length;
+    const thresholdQuantity = averageStock * (reorderThresholdPercentage / 100);
+    return productsData.filter(product => product.quantity < thresholdQuantity).length;
   };
 
   const handleUpload = async (file) => {
@@ -137,175 +140,82 @@ export default function DashboardDefault() {
   };
 
   return (
-    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      {/* row 1 */}
-      <Grid item xs={12} sx={{ mb: -2.25 }}>
-        <Typography variant="h5">Dashboard</Typography>
+    <Grid container spacing={2}>
+      {/* Page Header */}
+      <Grid item xs={12}>
+        <Typography variant="h5" gutterBottom>
+          Dashboard
+        </Typography>
       </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <AnalyticEcommerce title="Total Inventory Value" count={calculateTotalInventoryValue()}  />
-      </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <AnalyticEcommerce title="Stock Level" count={calculateTotalStockLevel()} />
-      </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <AnalyticEcommerce title="Stock Riskout" count={calculateStockRiskout()}  />
-      </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <AnalyticEcommerce title="Reorder Alerts" count={calculateReorderAlerts()}  />
-      </Grid>
-
-      <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />
-      <Grid container spacing={2}>
-        {/* Top Products Section */}
-        <Grid item xs={12} sm={4}>
-          <MainCard sx={{ height: '100%', display: 'flex', mt: 2, flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Typography variant="h5" gutterBottom>
-              Top Products
-            </Typography>
-            <OrdersTable />
-          </MainCard>
-        </Grid>
-
-        {/* Transaction History Section */}
-        <Grid item xs={12} sm={4}>
-          <MainCard sx={{ height: '100%', mt: 2, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Typography variant="h5" gutterBottom>
-              Transaction History
-            </Typography>
-            <List
-              component="nav"
-              sx={{
-                px: 0,
-                py: 0,
-                '& .MuiListItemButton-root': {
-                  py: 1.5,
-                  '& .MuiAvatar-root': avatarSX,
-                  '& .MuiListItemSecondaryAction-root': { ...actionSX, position: 'relative' }
-                }
-              }}
-            >
-              <ListItemButton divider>
-                <ListItemAvatar>
-                  <Avatar sx={{ color: 'success.main', bgcolor: 'success.lighter' }}>
-                    <GiftOutlined />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={<Typography variant="subtitle1">Order #002434</Typography>} secondary="Today, 2:00 AM" />
-                <ListItemSecondaryAction>
-                  <Stack alignItems="flex-end">
-                    <Typography variant="subtitle1" noWrap>
-                      + $1,430
-                    </Typography>
-                    <Typography variant="h6" color="secondary" noWrap>
-                      78%
-                    </Typography>
-                  </Stack>
-                </ListItemSecondaryAction>
-              </ListItemButton>
-              <ListItemButton divider>
-                <ListItemAvatar>
-                  <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>
-                    <MessageOutlined />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={<Typography variant="subtitle1">Order #984947</Typography>} secondary="5 August, 1:45 PM" />
-                <ListItemSecondaryAction>
-                  <Stack alignItems="flex-end">
-                    <Typography variant="subtitle1" noWrap>
-                      + $302
-                    </Typography>
-                    <Typography variant="h6" color="secondary" noWrap>
-                      8%
-                    </Typography>
-                  </Stack>
-                </ListItemSecondaryAction>
-              </ListItemButton>
-              <ListItemButton>
-                <ListItemAvatar>
-                  <Avatar sx={{ color: 'error.main', bgcolor: 'error.lighter' }}>
-                    <SettingOutlined />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={<Typography variant="subtitle1">Order #988784</Typography>} secondary="7 hours ago" />
-                <ListItemSecondaryAction>
-                  <Stack alignItems="flex-end">
-                    <Typography variant="subtitle1" noWrap>
-                      + $682
-                    </Typography>
-                    <Typography variant="h6" color="secondary" noWrap>
-                      16%
-                    </Typography>
-                  </Stack>
-                </ListItemSecondaryAction>
-              </ListItemButton>
-            </List>
-          </MainCard>
-        </Grid>
-
-        {/* Help & Support Chat Section */}
-        <Grid item xs={12} sm={4}>
-          <MainCard sx={{ height: '100%', mt: 2, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Typography variant="h5" noWrap>File Upload</Typography>
-            <Typography variant="caption" color="secondary" noWrap>Typical upload within 5 min</Typography>
-            <AvatarGroup sx={{ '& .MuiAvatar-root': { width: 32, height: 32 } }}>
-              <Avatar alt="Remy Sharp" src={avatar1} />
-              <Avatar alt="Travis Howard" src={avatar2} />
-              <Avatar alt="Cindy Baker" src={avatar3} />
-              <Avatar alt="Agnes Walker" src={avatar4} />
-            </AvatarGroup>
-            <Button size="small" variant="contained" sx={{ textTransform: 'capitalize' }} component="label">
-              Upload CSV
-              <input type="file" hidden onChange={onFileChange} />
-            </Button>
-          </MainCard>
+  
+      {/* Analytic Cards */}
+      <Grid item xs={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={3}>
+            <AnalyticEcommerce title="Total Inventory Value" count={`₹${totalInventoryValue}`} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <AnalyticEcommerce title="Stock Level" count={calculateTotalStockLevel()} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <AnalyticEcommerce title="Stock Riskout" count={calculateStockRiskout()} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <AnalyticEcommerce title="Reorder Alerts" count={calculateReorderAlerts()} />
+          </Grid>
         </Grid>
       </Grid>
-
-      {/* ToastContainer for notifications */}
-      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
-
-      {/* row 2 */}
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-          <UniqueVisitorCard />
+  
+      {/* Main Content Sections */}
+      <Grid item xs={12}>
+        <Grid container spacing={2}>
+          {/* Top Products Section */}
+          <Grid item xs={12} md={4}>
+            <MainCard title="Top Products">
+              <OrdersTable />
+            </MainCard>
+          </Grid>
+  
+          {/* File Upload Section */}
+          <Grid item xs={12} md={4}>
+            <MainCard title="File Upload">
+              <Button variant="contained" component="label">
+                Upload CSV
+                <input type="file" hidden onChange={onFileChange} />
+              </Button>
+            </MainCard>
+          </Grid>
+  
+          {/* Sales Report Card */}
+          <Grid item xs={12} md={4}>
+            <SaleReportCard />
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
+      </Grid>
+  
+      {/* Additional Rows for Data Visualization */}
+      <Grid item xs={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4}>
+            <UniqueVisitorCard />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <MainCard>
               <Typography variant="h5">Return Risk Analysis</Typography>
-            </Grid>
-            <Grid item />
+              <MonthlyBarChart salesData={salesData} />
+            </MainCard>
           </Grid>
-          <MainCard sx={{ mt: 2 }} content={false}>
-            <Box sx={{ p: 3, pb: 0 }}>
-              <Stack spacing={2}>
-                <Typography variant="h6" color="text.secondary">
-                  This Week Return Value
-                </Typography>
-                <Typography variant="h3">$765</Typography>
-              </Stack>
-            </Box>
-            <MonthlyBarChart salesData={salesData} />
-          </MainCard>
-        </Grid>
-        <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
+          <Grid item xs={12} md={4}>
+            <MainCard>
               <Typography variant="h5">Customer Sentiment Analysis</Typography>
-            </Grid>
-            <Grid item />
+              <ReportAreaChart />
+            </MainCard>
           </Grid>
-          <MainCard sx={{ mt: 2 }} content={false}>
-            <ReportAreaChart />
-          </MainCard>
         </Grid>
       </Grid>
-
-      {/* row 3 */}
-      <Grid item xs={12} md={7} lg={8}>
-        <SaleReportCard sx={{ mt: 2 }} />
-      </Grid>
+  
+      {/* ToastContainer for Notifications */}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
     </Grid>
   );
 }
