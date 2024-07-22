@@ -28,12 +28,10 @@ const areaChartOptions = {
   }
 };
 
-// ==============================|| INCOME AREA CHART ||============================== //
-
-export default function IncomeAreaChart({ slot }) {
+export default function IncomeAreaChart({ slot, salesData }) {
   const theme = useTheme();
 
-  const { primary, secondary } = theme.palette.text;
+  const { secondary } = theme.palette.text;
   const line = theme.palette.divider;
 
   const [options, setOptions] = useState(areaChartOptions);
@@ -41,35 +39,19 @@ export default function IncomeAreaChart({ slot }) {
   useEffect(() => {
     setOptions((prevState) => ({
       ...prevState,
-      colors: [theme.palette.primary.main, theme.palette.primary[700]],
+      colors: [theme.palette.primary.main],
       xaxis: {
-        categories:
-          slot === 'month'
-            ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        categories: getCategories(),
         labels: {
           style: {
-            colors: [
-              secondary,
-              secondary,
-              secondary,
-              secondary,
-              secondary,
-              secondary,
-              secondary,
-              secondary,
-              secondary,
-              secondary,
-              secondary,
-              secondary
-            ]
+            colors: Array(12).fill(secondary)
           }
         },
         axisBorder: {
           show: true,
           color: line
         },
-        tickAmount: slot === 'month' ? 11 : 7
+        tickAmount: getTickAmount()
       },
       yaxis: {
         labels: {
@@ -82,33 +64,52 @@ export default function IncomeAreaChart({ slot }) {
         borderColor: line
       }
     }));
-  }, [primary, secondary, line, theme, slot]);
+  }, [secondary, line, theme, slot, salesData]);
 
-  const [series, setSeries] = useState([
-    {
-      name: 'Online Sales',
-      data: [0, 86, 28, 115, 48, 210, 136]
-    },
-    {
-      name: 'Offline Sales',
-      data: [0, 43, 14, 56, 24, 105, 68]
+  const getCategories = () => {
+    if (slot === 'year') {
+      return salesData.yearlySales?.map((item) => item.year.toString()) || [];
+    } else if (slot === 'month') {
+      return salesData.monthlySales?.map((item) => item.month) || [];
+    } else if (slot === 'week') {
+      return salesData.weeklySales?.map((item) => `Week ${item.week}`) || [];
     }
-  ]);
+    return [];
+  };
+
+  const getTickAmount = () => {
+    if (slot === 'year') return salesData.yearlySales?.length || 0;
+    if (slot === 'month') return 12;
+    if (slot === 'week') return salesData.weeklySales?.length || 0;
+    return 0;
+  };
+
+  const [series, setSeries] = useState([]);
 
   useEffect(() => {
-    setSeries([
-      {
-        name: 'Online Sales',
-        data: slot === 'month' ? [76, 85, 101, 98, 87, 105, 91, 114, 94, 86, 115, 35] : [31, 40, 28, 51, 42, 109, 100]
-      },
-      {
-        name: 'Offline Sales',
-        data: slot === 'month' ? [110, 60, 150, 35, 60, 36, 26, 45, 65, 52, 53, 41] : [11, 32, 45, 32, 34, 52, 41]
+    if (salesData) {
+      let data = [];
+      if (slot === 'year') {
+        data = salesData.yearlySales?.map((item) => item.totalQuantitySold) || [];
+      } else if (slot === 'month') {
+        data = salesData.monthlySales?.map((item) => item.totalQuantitySold) || [];
+      } else if (slot === 'week') {
+        data = salesData.weeklySales?.map((item) => item.totalQuantitySold) || [];
       }
-    ]);
-  }, [slot]);
+
+      setSeries([
+        {
+          name: 'Total Sales',
+          data: data
+        }
+      ]);
+    }
+  }, [slot, salesData]);
 
   return <ReactApexChart options={options} series={series} type="area" height={450} />;
 }
 
-IncomeAreaChart.propTypes = { slot: PropTypes.string };
+IncomeAreaChart.propTypes = {
+  slot: PropTypes.string,
+  salesData: PropTypes.object
+};
