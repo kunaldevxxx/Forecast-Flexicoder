@@ -15,7 +15,8 @@ function Forecasting() {
   });
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
-  const [selectedDate, setSelectedDate] = useState(moment());  // Defaulting to current date
+  // Initialize with current date and ensure it's correctly formatted for component consistency.
+  const [selectedDate, setSelectedDate] = useState(moment());
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -24,9 +25,7 @@ function Forecasting() {
         const response = await axios.get('https://forecasting-kfs8.onrender.com/products', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (response.data && response.data.products) {
-          setProducts(response.data.products);
-        }
+        setProducts(response.data.products);
       } catch (error) {
         console.error('Failed to fetch products', error);
       }
@@ -36,26 +35,26 @@ function Forecasting() {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!selectedProduct || !selectedDate) return;
+    if (!selectedProduct || !selectedDate) return;
 
+    const fetchData = async () => {
       const token = localStorage.getItem('jwt');
+      const formattedDate = selectedDate.format('DD-MM-YYYY'); // Use moment's format method directly
       const urls = [
         `https://forecasting-kfs8.onrender.com/predict-out-of-stock/${selectedProduct}`,
         `https://forecasting-kfs8.onrender.com/products/${selectedProduct}/demand`,
-        `https://forecasting-kfs8.onrender.com/products/${selectedProduct}/stock-requirement?date=${moment(selectedDate).format('DD-MM-YYYY')}`
+        `https://forecasting-kfs8.onrender.com/products/${selectedProduct}/stock-requirement?date=${formattedDate}`
       ];
 
       try {
         const responses = await Promise.all(urls.map(url =>
           axios.get(url, { headers: { Authorization: `Bearer ${token}` } })
         ));
-        setData(prevData => ({
-          ...prevData,
+        setData({
           outOfStock: [responses[0].data],
           demand: responses[1].data.salesData,
           stock: responses[2].data
-        }));
+        });
       } catch (error) {
         console.error('Failed to fetch data', error);
       }
@@ -166,7 +165,7 @@ function Forecasting() {
         <Title level={4}>Stock Requirement Prediction</Title>
         <ApexCharts
           options={chartOptionsStock}
-          series={[{ name: 'Stock Status', data: [{ x: new Date(data.stock.date).getTime(), y: data.stock.averageDailySales }] }]}
+          series={[{ name: 'Average Daily', data: [{ x: new Date(data.stock.date).getTime(), y: data.stock.averageDailySales }] }]}
           type="line"
           height={350}
         />
