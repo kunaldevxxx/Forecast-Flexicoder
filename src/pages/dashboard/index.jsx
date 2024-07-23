@@ -98,9 +98,7 @@ export default function DashboardDefault() {
 
     // Constructing a string with names and counts
     return riskyProducts.map(product => `${product.name}: ${product.quantity}`).join(', ');
-};
-
-
+  };
 
   const calculateReorderAlerts = () => {
     if (!productsData || productsData.length === 0) return 0;
@@ -141,81 +139,92 @@ export default function DashboardDefault() {
 
   return (
     <Grid container spacing={2}>
-      {/* Page Header */}
-      <Grid item xs={12}>
-        <Typography variant="h5" gutterBottom>
-          Dashboard
-        </Typography>
+  {/* Highlight File Upload at the Top for Immediate Access */}
+  <Grid item xs={12}>
+  <MainCard title="Quick Actions" sx={{ p: 1 }}>
+    <Button
+      variant="contained"
+      component="label"
+      sx={{
+        
+        backgroundColor: "primary.main", // Use theme color
+        '&:hover': {
+          backgroundColor: "primary.dark", // Darken button on hover
+          transition: "background-color 0.3s ease-in-out"
+        }
+      }}
+    >
+      Upload CSV
+      <input type="file" hidden onChange={onFileChange} />
+    </Button>
+    <Typography variant="h9" gutterBottom sx={{ ml:4 }}>
+      Quickly upload your data to see analytics
+    </Typography>
+  </MainCard>
+</Grid>
+
+
+  {/* Dashboard Overview */}
+  <Grid item xs={12}>
+    <Typography variant="h4" gutterBottom>
+      Dashboard Overview
+    </Typography>
+  </Grid>
+
+  {/* Key Metrics */}
+  <Grid item xs={12}>
+    <Grid container spacing={2}>
+      <Grid item xs={12} sm={6} md={3}>
+        <AnalyticEcommerce title="Total Inventory Value" count={`₹${totalInventoryValue}`} />
       </Grid>
-  
-      {/* Analytic Cards */}
-      <Grid item xs={12}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <AnalyticEcommerce title="Total Inventory Value" count={`₹${totalInventoryValue}`} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <AnalyticEcommerce title="Stock Level" count={calculateTotalStockLevel()} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <AnalyticEcommerce title="Stock Riskout" count={calculateStockRiskout()} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <AnalyticEcommerce title="Reorder Alerts" count={calculateReorderAlerts()} />
-          </Grid>
-        </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <AnalyticEcommerce title="Stock Level" count={calculateTotalStockLevel()} />
       </Grid>
-  
-      {/* Main Content Sections */}
-      <Grid item xs={12}>
-        <Grid container spacing={2}>
-          {/* Top Products Section */}
-          <Grid item xs={12} md={4}>
-            <MainCard title="Top Products">
-              <OrdersTable />
-            </MainCard>
-          </Grid>
-  
-          {/* File Upload Section */}
-          <Grid item xs={12} md={4}>
-            <MainCard title="File Upload">
-              <Button variant="contained" component="label">
-                Upload CSV
-                <input type="file" hidden onChange={onFileChange} />
-              </Button>
-            </MainCard>
-          </Grid>
-  
-          {/* Sales Report Card */}
-          <Grid item xs={12} md={4}>
-            <SaleReportCard />
-          </Grid>
-        </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <AnalyticEcommerce title="Stock Riskout" count={calculateStockRiskout()} />
       </Grid>
-  
-      {/* Additional Rows for Data Visualization */}
-      <Grid item xs={12}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={4}>
-            <UniqueVisitorCard />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <MainCard>
-              <Typography variant="h5">Return Risk Analysis</Typography>
-              <MonthlyBarChart salesData={salesData} />
-            </MainCard>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <MainCard>
-              <Typography variant="h5">Customer Sentiment Analysis</Typography>
-              <ReportAreaChart />
-            </MainCard>
-          </Grid>
-        </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <AnalyticEcommerce title="Reorder Alerts" count={calculateReorderAlerts()} />
       </Grid>
-  
-      {/* ToastContainer for Notifications */}
-      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
     </Grid>
+  </Grid>
+
+  {/* Data Visualization Sections */}
+  <Grid item xs={12}>
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={6}>
+        <MainCard title="Top Products">
+          <OrdersTable />
+        </MainCard>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <MainCard title="Sales Report">
+          <SaleReportCard />
+        </MainCard>
+      </Grid>
+    </Grid>
+  </Grid>
+
+  {/* Additional Metrics and Analyses */}
+  <Grid item xs={12}>
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={6}>
+        <MainCard>
+          <Typography variant="h5">Return Risk Analysis</Typography>
+          <MonthlyBarChart salesData={salesData} />
+        </MainCard>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <MainCard>
+          <Typography variant="h5">Customer Sentiment Analysis</Typography>
+          <ReportAreaChart />
+        </MainCard>
+      </Grid>
+    </Grid>
+  </Grid>
+
+  {/* Notifications */}
+  <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+</Grid>
   );
 }

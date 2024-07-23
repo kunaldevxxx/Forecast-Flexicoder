@@ -13,8 +13,9 @@ const UniqueVisitorCard = Loadable(lazy(() => import('pages/dashboard/UniqueVisi
 const MonthlyBarChart = Loadable(lazy(() => import('pages/dashboard/MonthlyBarChart')));
 const ReportArea = Loadable(lazy(() => import('pages/dashboard/ReportArea')));
 const TopProduct = Loadable(lazy(() => import('pages/dashboard/TopProduct')));
-
-
+const Forecast = Loadable(lazy(()=> import('pages/dashboard/Forecasting')));
+const Products = Loadable(lazy(()=> import('pages/dashboard/Product')));
+const CreateSale= Loadable(lazy(()=> import('pages/dashboard/CreateSale')));
 // render - sample page
 const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 
@@ -60,15 +61,19 @@ const MainRoutes = {
     {
       path: '/TopProduct',
       element: <TopProduct />
+    },
+    {
+      path: '/Forecast',
+      element: <Forecast />
+    },
+    {
+      path: '/Product',
+      element: <Products />
+    },
+    {
+      path: '/CreateSale',
+      element: <CreateSale />
     }
-    // {
-    //   path: 'shadow',
-    //   element: <Shadow />
-    // },
-    // {
-    //   path: 'typography',
-    //   element: <Typography />
-    // }
   ]
 };
 

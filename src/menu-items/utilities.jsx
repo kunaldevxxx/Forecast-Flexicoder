@@ -37,15 +37,15 @@ const utilities = {
       id: 'util-typography',
       title: 'Sales Forecasting  ',
       type: 'item',
-      url: '/typography',
+      url: '/Forecast',
       icon: icons.FcSalesPerformance
     },
     {
       id: 'util-color',
       title: 'Products',
       type: 'item',
-      url: '/color',
-      icon: icons.BarcodeOutlined
+      url: '/Product',
+      icon: icons.FcStackOfPhotos
     },
     {
       id: 'util-shadow',
@@ -84,9 +84,9 @@ const utilities = {
     },
     {
       id: 'util-shadow',
-      title: 'Manage Inventory',
+      title: 'Create Sale',
       type: 'item',
-      url: '/shadow',
+      url: '/CreateSale',
       icon: icons.FcFactory
     }
   ]

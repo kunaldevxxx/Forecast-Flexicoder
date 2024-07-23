@@ -83,12 +83,23 @@ export default function ReportAreaChart() {
         y: sale.totalQuantitySold
       }));
       setSeries([{ name: 'Sales', data: salesData }]);
-      
-      // Simulate sentiment data based on sales fluctuations
-      const sentimentScores = salesData.map(sale => ({
-        x: sale.x,
-        y: (sale.y > 1000 ? 0.8 : 0.2) // Example condition
-      }));
+  
+      // Calculate sentiment scores more dynamically
+      const sentimentScores = salesData.map((sale, index, array) => {
+        if (index === 0) return { x: sale.x, y: 0.5 }; // Default sentiment for the first month as neutral
+  
+        const previousSale = array[index - 1];
+        const percentageChange = (sale.y - previousSale.y) / previousSale.y;
+  
+        // Determine sentiment based on percentage change
+        let sentiment = 0.5; // Neutral
+        if (percentageChange > 0.2) sentiment = 0.8; // Strong positive
+        else if (percentageChange > 0) sentiment = 0.6; // Slight positive
+        else if (percentageChange < -0.2) sentiment = 0.2; // Strong negative
+        else if (percentageChange < 0) sentiment = 0.4; // Slight negative
+  
+        return { x: sale.x, y: sentiment };
+      });
       setSentimentData(sentimentScores);
     } catch (error) {
       console.error('Failed to fetch sales data:', error);

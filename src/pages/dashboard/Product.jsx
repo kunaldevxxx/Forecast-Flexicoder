@@ -57,7 +57,7 @@ const fetchData = async (sortType) => {
   }
 };
 
-function OrderTable() {
+function Products() {
   const [rows, setRows] = useState([]);
   const [sortType, setSortType] = useState('top');
 
@@ -107,9 +107,9 @@ function OrderTable() {
   );
 }
 
-OrderTable.propTypes = {
+Products.propTypes = {
   order: PropTypes.any,
   orderBy: PropTypes.string
 };
 
-export default OrderTable;
+export default Products;

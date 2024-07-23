@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import ReactApexChart from 'react-apexcharts';
@@ -16,25 +16,26 @@ const defaultBarChartOptions = {
   plotOptions: {
     bar: {
       columnWidth: '50%',
-      borderRadius: 6,
+      borderRadius: 10,
       horizontal: false,
-      distributed: true,  // This will allow us to specify colors per bar
+      distributed: true
     }
   },
   dataLabels: {
     enabled: true,
-    formatter: function (val, opts) {
-      const dataIndex = opts.dataPointIndex;
-      const returnRisk = opts.w.config.series[opts.seriesIndex].data[dataIndex].returnRisk;
-      return `Return: ${returnRisk}`;
+    formatter: function (val, { seriesIndex, dataPointIndex, w }) {
+      const item = w.config.series[seriesIndex].data[dataPointIndex];
+      return `${item.y} (${item.returnRisk})`;
     },
     style: {
-      colors: ['#fff']
+      colors: ['#fff'],
+      fontSize: '12px',
+      fontFamily: 'Helvetica, Arial, sans-serif',
     },
     background: {
       enabled: true,
       foreColor: '#000',
-      padding: 6,
+      padding: 4,
       borderRadius: 4,
       borderWidth: 1,
       borderColor: '#ddd'
@@ -50,7 +51,8 @@ const defaultBarChartOptions = {
     },
     labels: {
       style: {
-        colors: '#666'
+        colors: '#666',
+        fontSize: '12px'
       }
     }
   },
@@ -59,12 +61,14 @@ const defaultBarChartOptions = {
     title: {
       text: 'Quantity',
       style: {
-        color: '#666'
+        color: '#666',
+        fontSize: '16px'
       }
     },
     labels: {
       style: {
-        colors: '#666'
+        colors: '#666',
+        fontSize: '12px'
       }
     }
   },
@@ -86,7 +90,7 @@ const defaultBarChartOptions = {
         borderColor: '#FF4560',
         borderWidth: 1,
         label: {
-          text: 'Zero Line',
+          text: 'Baseline',
           style: {
             color: '#FF4560',
             background: '#FFF',
@@ -97,12 +101,13 @@ const defaultBarChartOptions = {
       }
     ]
   },
-  colors: [], // We'll set this dynamically
+  colors: [], // Set dynamically based on returnRisk
   tooltip: {
     enabled: true,
+    theme: 'dark',
     custom: function({ series, seriesIndex, dataPointIndex, w }) {
-      const returnRisk = w.config.series[seriesIndex].data[dataPointIndex].returnRisk;
-      return `<div>Return Risk: ${returnRisk}</div>`;
+      const item = w.config.series[seriesIndex].data[dataPointIndex];
+      return `<div style="padding: 5px; font-size: 12px;"><strong>${item.x}</strong><br>Stock: ${item.y}<br>Risk: ${item.returnRisk}</div>`;
     }
   }
 };
@@ -132,7 +137,13 @@ export default function MonthlyBarChart() {
         y: item.totalQuantitySold,
         returnRisk: item.returnRisk
       }));
-      const colors = data.map(item => item.returnRisk === 'High' ? '#FF4560' : '#00A9E0');
+      const colors = data.map(item => {
+        switch(item.returnRisk) {
+          case 'High': return '#FF4560'; // Red
+          case 'Medium': return '#FFC107'; // Amber
+          default: return '#00A9E0'; // Blue
+        }
+      });
 
       setOptions(prevState => ({
         ...prevState,

@@ -23,18 +23,17 @@ import Box from '@mui/material/Box';
 import MainCard from 'components/MainCard';
 import Transitions from 'components/@extended/Transitions';
 
-// assets
-import BellOutlined from '@ant-design/icons/BellOutlined';
-import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
-import GiftOutlined from '@ant-design/icons/GiftOutlined';
-import MessageOutlined from '@ant-design/icons/MessageOutlined';
-import SettingOutlined from '@ant-design/icons/SettingOutlined';
+// react-icons
+import { FcClock } from "react-icons/fc";
+import { FcApproval } from 'react-icons/fc';
+import { FcShop } from 'react-icons/fc';
+import { FcSalesPerformance } from 'react-icons/fc';
 
 // sx styles
 const avatarSX = {
   width: 36,
   height: 36,
-  fontSize: '1rem'
+  fontSize: '1.25rem'
 };
 
 const actionSX = {
@@ -43,11 +42,8 @@ const actionSX = {
   top: 'auto',
   right: 'auto',
   alignSelf: 'flex-start',
-
   transform: 'none'
 };
-
-// ==============================|| HEADER CONTENT - NOTIFICATION ||============================== //
 
 export default function Notification() {
   const theme = useTheme();
@@ -56,6 +52,7 @@ export default function Notification() {
   const anchorRef = useRef(null);
   const [read, setRead] = useState(2);
   const [open, setOpen] = useState(false);
+
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
@@ -67,22 +64,20 @@ export default function Notification() {
     setOpen(false);
   };
 
-  const iconBackColorOpen = 'grey.100';
-
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
       <IconButton
         color="secondary"
         variant="light"
-        sx={{ color: 'text.primary', bgcolor: open ? iconBackColorOpen : 'transparent' }}
-        aria-label="open profile"
+        sx={{ color: 'text.primary', bgcolor: open ? 'grey.100' : 'transparent' }}
+        aria-label="open notifications"
         ref={anchorRef}
-        aria-controls={open ? 'profile-grow' : undefined}
+        aria-controls={open ? 'notifications-grow' : undefined}
         aria-haspopup="true"
         onClick={handleToggle}
       >
         <Badge badgeContent={read} color="primary">
-          <BellOutlined />
+          <FcClock />
         </Badge>
       </IconButton>
       <Popper
@@ -99,20 +94,18 @@ export default function Notification() {
             <Paper sx={{ boxShadow: theme.customShadows.z1, width: '100%', minWidth: 285, maxWidth: { xs: 285, md: 420 } }}>
               <ClickAwayListener onClickAway={handleClose}>
                 <MainCard
-                  title="Notification"
+                  title="Notifications"
                   elevation={0}
                   border={false}
                   content={false}
                   secondary={
-                    <>
-                      {read > 0 && (
-                        <Tooltip title="Mark as all read">
-                          <IconButton color="success" size="small" onClick={() => setRead(0)}>
-                            <CheckCircleOutlined style={{ fontSize: '1.15rem' }} />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </>
+                    read > 0 && (
+                      <Tooltip title="Mark all as read">
+                        <IconButton color="success" size="small" onClick={() => setRead(0)}>
+                          <FcApproval style={{ fontSize: '1.25rem' }} />
+                        </IconButton>
+                      </Tooltip>
+                    )
                   }
                 >
                   <List
@@ -129,109 +122,31 @@ export default function Notification() {
                   >
                     <ListItemButton selected={read > 0}>
                       <ListItemAvatar>
-                        <Avatar sx={{ color: 'success.main', bgcolor: 'success.lighter' }}>
-                          <GiftOutlined />
+                        <Avatar sx={{ color: 'error.main', bgcolor: 'error.lighter' }}>
+                          <FcShop />
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            It&apos;s{' '}
-                            <Typography component="span" variant="subtitle1">
-                              Cristina danny&apos;s
-                            </Typography>{' '}
-                            birthday today.
-                          </Typography>
-                        }
-                        secondary="2 min ago"
+                        primary={<Typography variant="subtitle1">Product XYZ is out of stock.</Typography>}
+                        secondary="Just now"
                       />
-                      <ListItemSecondaryAction>
-                        <Typography variant="caption" noWrap>
-                          3:00 AM
-                        </Typography>
-                      </ListItemSecondaryAction>
                     </ListItemButton>
                     <Divider />
                     <ListItemButton>
                       <ListItemAvatar>
                         <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>
-                          <MessageOutlined />
+                          <FcSalesPerformance />
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            <Typography component="span" variant="subtitle1">
-                              Aida Burg
-                            </Typography>{' '}
-                            commented your post.
-                          </Typography>
-                        }
-                        secondary="5 August"
+                        primary={<Typography variant="subtitle1">New sale: $500 in electronics.</Typography>}
+                        secondary="30 mins ago"
                       />
-                      <ListItemSecondaryAction>
-                        <Typography variant="caption" noWrap>
-                          6:00 PM
-                        </Typography>
-                      </ListItemSecondaryAction>
-                    </ListItemButton>
-                    <Divider />
-                    <ListItemButton selected={read > 0}>
-                      <ListItemAvatar>
-                        <Avatar sx={{ color: 'error.main', bgcolor: 'error.lighter' }}>
-                          <SettingOutlined />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            Your Profile is Complete &nbsp;
-                            <Typography component="span" variant="subtitle1">
-                              60%
-                            </Typography>{' '}
-                          </Typography>
-                        }
-                        secondary="7 hours ago"
-                      />
-                      <ListItemSecondaryAction>
-                        <Typography variant="caption" noWrap>
-                          2:45 PM
-                        </Typography>
-                      </ListItemSecondaryAction>
-                    </ListItemButton>
-                    <Divider />
-                    <ListItemButton>
-                      <ListItemAvatar>
-                        <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>C</Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            <Typography component="span" variant="subtitle1">
-                              Cristina Danny
-                            </Typography>{' '}
-                            invited to join{' '}
-                            <Typography component="span" variant="subtitle1">
-                              Meeting.
-                            </Typography>
-                          </Typography>
-                        }
-                        secondary="Daily scrum meeting time"
-                      />
-                      <ListItemSecondaryAction>
-                        <Typography variant="caption" noWrap>
-                          9:10 PM
-                        </Typography>
-                      </ListItemSecondaryAction>
                     </ListItemButton>
                     <Divider />
                     <ListItemButton sx={{ textAlign: 'center', py: `${12}px !important` }}>
                       <ListItemText
-                        primary={
-                          <Typography variant="h6" color="primary">
-                            View All
-                          </Typography>
-                        }
+                        primary={<Typography variant="h6" color="primary">View All</Typography>}
                       />
                     </ListItemButton>
                   </List>
