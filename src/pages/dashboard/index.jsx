@@ -3,9 +3,9 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  Avatar, AvatarGroup, Box, Button, Grid, List, ListItemAvatar, ListItemButton, ListItemSecondaryAction,
-  ListItemText, Stack, Typography
+  Avatar, Box, Button, Grid, Typography, Card, CardContent, CardHeader, Divider
 } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import MonthlyBarChart from './MonthlyBarChart';
@@ -13,18 +13,31 @@ import OrdersTable from './OrdersTable';
 import ReportAreaChart from './ReportAreaChart';
 import SaleReportCard from './SaleReportCard';
 import UniqueVisitorCard from './UniqueVisitorCard';
-import GiftOutlined from '@ant-design/icons/GiftOutlined';
-import MessageOutlined from '@ant-design/icons/MessageOutlined';
-import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import avatar1 from 'assets/images/users/avatar-1.png';
 import avatar2 from 'assets/images/users/avatar-2.png';
 import avatar3 from 'assets/images/users/avatar-3.png';
 import avatar4 from 'assets/images/users/avatar-4.png';
 
+const CustomCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: 12,
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  overflow: 'visible',
+  '& .MuiCardHeader-root': {
+    borderRadius: 12,
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.contrastText,
+  },
+  '& .MuiCardContent-root': {
+    borderRadius: 12,
+    padding: theme.spacing(2),
+  },
+}));
+
 const avatarSX = {
   width: 36,
   height: 36,
-  fontSize: '1rem'
+  fontSize: '1rem',
 };
 
 const actionSX = {
@@ -33,10 +46,11 @@ const actionSX = {
   top: 'auto',
   right: 'auto',
   alignSelf: 'flex-start',
-  transform: 'none'
+  transform: 'none',
 };
 
-export default function DashboardDefault() {
+const DashboardDefault = () => {
+  const theme = useTheme();
   const [salesData, setSalesData] = useState([]);
   const [productsData, setProductsData] = useState([]);
   const [totalInventoryValue, setTotalInventoryValue] = useState(0);
@@ -48,7 +62,7 @@ export default function DashboardDefault() {
       try {
         const token = localStorage.getItem('jwt');
         const config = {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${token}` },
         };
         const salesResponse = await axios.get('https://forecasting-kfs8.onrender.com/sales', config);
         setSalesData(salesResponse.data.sales);
@@ -61,11 +75,10 @@ export default function DashboardDefault() {
 
         const inventoryResponse = await axios.get('https://forecasting-kfs8.onrender.com/inventory', config);
         setTotalInventoryValue(inventoryResponse.data.totalInventoryValue.toFixed(2));  // Set total inventory value from API
-      
+
       } catch (error) {
         console.error('Error fetching data:', error);
       }
-      
     };
 
     fetchData();
@@ -75,7 +88,7 @@ export default function DashboardDefault() {
     if (!productsData || productsData.length === 0) return '0.00';
     return productsData.reduce((acc, product) => acc + parseFloat(product.price) * product.quantity, 0).toFixed(2);
   };
-  
+
   const calculateTotalStockLevel = () => {
     if (!productsData || productsData.length === 0) return 0;
     return productsData.reduce((acc, product) => acc + product.quantity, 0);
@@ -83,8 +96,8 @@ export default function DashboardDefault() {
 
   const calculateStockRiskout = () => {
     if (!productsData || productsData.length === 0) {
-        console.log('No products data available.');
-        return "No data";
+      console.log('No products data available.');
+      return "No data";
     }
 
     const totalStock = calculateTotalStockLevel();
@@ -97,15 +110,15 @@ export default function DashboardDefault() {
     const uniqueRiskyProducts = [];
 
     riskyProducts.forEach(product => {
-        if (!processedProductNames.has(product.name)) {
-            processedProductNames.add(product.name);
-            uniqueRiskyProducts.push(product);
-        }
+      if (!processedProductNames.has(product.name)) {
+        processedProductNames.add(product.name);
+        uniqueRiskyProducts.push(product);
+      }
     });
 
     // Constructing a string with names and counts
     return uniqueRiskyProducts.map(product => `${product.name}: ${product.quantity}`).join(', ');
-};
+  };
 
   const calculateReorderAlerts = () => {
     if (!productsData || productsData.length === 0) return 0;
@@ -121,8 +134,8 @@ export default function DashboardDefault() {
     const config = {
       headers: {
         'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${token}`
-      }
+        'Authorization': `Bearer ${token}`,
+      },
     };
 
     try {
@@ -145,93 +158,143 @@ export default function DashboardDefault() {
   };
 
   return (
-    <Grid container spacing={2}>
-  {/* Highlight File Upload at the Top for Immediate Access */}
-  <Grid item xs={12}>
-  <MainCard title="Quick Actions" sx={{ p: 1 }}>
-    <Button
-      variant="contained"
-      component="label"
-      sx={{
-        
-        backgroundColor: "primary.main", // Use theme color
-        '&:hover': {
-          backgroundColor: "primary.dark", // Darken button on hover
-          transition: "background-color 0.3s ease-in-out"
-        }
-      }}
-    >
-      Upload CSV
-      <input type="file" hidden onChange={onFileChange} />
-    </Button>
-    <Typography variant="h9" gutterBottom sx={{ ml:4 }}>
-      Quickly upload your data to see analytics
-    </Typography>
-  </MainCard>
-</Grid>
+    <Grid container spacing={3} sx={{ p: 3 }}>
+      {/* Highlight File Upload at the Top for Immediate Access */}
+      <Grid item xs={12}>
+        <CustomCard>
+          <CardHeader title="Quick Actions" />
+          <CardContent>
+            <Button
+              variant="contained"
+              component="label"
+              sx={{
+                backgroundColor: theme.palette.secondary.main,
+                '&:hover': {
+                  backgroundColor: theme.palette.secondary.dark,
+                  transition: "background-color 0.3s ease-in-out",
+                },
+                width: '100%',
+              }}
+            >
+              Upload CSV
+              <input type="file" hidden onChange={onFileChange} />
+            </Button>
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              Quickly upload your data to see analytics
+            </Typography>
+          </CardContent>
+        </CustomCard>
+      </Grid>
 
+      {/* Dashboard Overview */}
+      <Grid item xs={12}>
+        <Typography variant="h4" gutterBottom color={theme.palette.secondary.dark}>
+          Dashboard Overview
+        </Typography>
+      </Grid>
 
-  {/* Dashboard Overview */}
-  <Grid item xs={12}>
-    <Typography variant="h4" gutterBottom>
-      Dashboard Overview
-    </Typography>
-  </Grid>
+      {/* Key Metrics */}
+      <Grid item xs={12}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6} md={3}>
+            <MainCard>
+              <CardContent>
+                <Typography variant="h6" color="textPrimary">
+                  Total Inventory Value
+                </Typography>
+                <Typography variant="h4" color="secondary">
+                  ₹{totalInventoryValue}
+                </Typography>
+              </CardContent>
+            </MainCard>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <MainCard>
+              <CardContent>
+                <Typography variant="h6" color="textPrimary">
+                  Stock Level
+                </Typography>
+                <Typography variant="h4" color="secondary">
+                  {calculateTotalStockLevel()}
+                </Typography>
+              </CardContent>
+            </MainCard>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <MainCard>
+              <CardContent>
+                <Typography variant="h6" color="textPrimary">
+                  Stock Riskout
+                </Typography>
+                <Typography variant="h4" color="secondary">
+                  {calculateStockRiskout()}
+                </Typography>
+              </CardContent>
+            </MainCard>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <MainCard>
+              <CardContent>
+                <Typography variant="h6" color="textPrimary">
+                  Reorder Alerts
+                </Typography>
+                <Typography variant="h4" color="secondary">
+                  {calculateReorderAlerts()}
+                </Typography>
+              </CardContent>
+            </MainCard>
+          </Grid>
+        </Grid>
+      </Grid>
 
-  {/* Key Metrics */}
-  <Grid item xs={12}>
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={6} md={3}>
-        <AnalyticEcommerce title="Total Inventory Value" count={`₹${totalInventoryValue}`} />
+      {/* Data Visualization Sections */}
+      <Grid item xs={12}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <CustomCard>
+              <CardHeader title="Top Products" />
+              <CardContent>
+                <OrdersTable />
+              </CardContent>
+            </CustomCard>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <CustomCard>
+              <CardHeader title="Sales Report" />
+              <CardContent>
+                <SaleReportCard />
+              </CardContent>
+            </CustomCard>
+          </Grid>
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={6} md={3}>
-        <AnalyticEcommerce title="Stock Level" count={calculateTotalStockLevel()} />
+
+      {/* Additional Metrics and Analyses */}
+      <Grid item xs={12}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <CustomCard>
+              <CardHeader title="Return Risk Analysis" />
+              <CardContent>
+                <MonthlyBarChart salesData={salesData} />
+              </CardContent>
+            </CustomCard>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <CustomCard>
+              <CardHeader title="Customer Sentiment Analysis" />
+              <CardContent>
+                <ReportAreaChart />
+              </CardContent>
+            </CustomCard>
+          </Grid>
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={6} md={3}>
-        <AnalyticEcommerce title="Stock Riskout" count={calculateStockRiskout()} />
-      </Grid>
-      <Grid item xs={12} sm={6} md={3}>
-        <AnalyticEcommerce title="Reorder Alerts" count={calculateReorderAlerts()} />
-      </Grid>
+
+      {/* Notifications */}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
     </Grid>
-  </Grid>
-
-  {/* Data Visualization Sections */}
-  <Grid item xs={12}>
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={6}>
-        <MainCard title="Top Products">
-          <OrdersTable />
-        </MainCard>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <MainCard title="Sales Report">
-          <SaleReportCard />
-        </MainCard>
-      </Grid>
-    </Grid>
-  </Grid>
-
-  {/* Additional Metrics and Analyses */}
-  <Grid item xs={12}>
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={6}>
-        <MainCard>
-          <Typography variant="h5">Return Risk Analysis</Typography>
-          <MonthlyBarChart salesData={salesData} />
-        </MainCard>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <MainCard>
-          <Typography variant="h5">Customer Sentiment Analysis</Typography>
-          <ReportAreaChart />
-        </MainCard>
-      </Grid>
-    </Grid>
-  </Grid>
-
-  {/* Notifications */}
-  <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
-</Grid>
   );
-}
+};
+
+export default DashboardDefault;
