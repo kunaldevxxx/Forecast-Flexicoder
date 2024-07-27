@@ -8,7 +8,7 @@ import {
   LoadingOutlined
 } from '@ant-design/icons';
 import { FcBarChart, FcFactory, FcPaid, FcSalesPerformance, FcStackOfPhotos, FcStatistics } from "react-icons/fc";
-
+import { FcLineChart } from "react-icons/fc";
 
 // icons
 const icons = {
@@ -23,7 +23,7 @@ const icons = {
   FcStatistics,
  FcBarChart,
  FcFactory,
- FcPaid
+ FcPaid,FcLineChart
 };
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
@@ -60,6 +60,13 @@ const utilities = {
       type: 'item',
       url: '/UniqueVisitorCard',
       icon: icons.FcStatistics
+    },
+    {
+      id: 'util-seasonalforecast',
+      title: 'Seasonal Forecast',
+      type: 'item',
+      url: '/SeasonalForecast',
+      icon: icons.FcLineChart
     },
     {
       id: 'util-bar',

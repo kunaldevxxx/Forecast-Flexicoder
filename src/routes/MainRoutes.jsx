@@ -16,6 +16,7 @@ const TopProduct = Loadable(lazy(() => import('pages/dashboard/TopProduct')));
 const Forecast = Loadable(lazy(()=> import('pages/dashboard/Forecasting')));
 const Products = Loadable(lazy(()=> import('pages/dashboard/Product')));
 const CreateSale= Loadable(lazy(()=> import('pages/dashboard/CreateSale')));
+const SeasonalForecasting = Loadable(lazy(()=>import('pages/dashboard/SeasonalForecasting')));
 // render - sample page
 const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 
@@ -73,6 +74,10 @@ const MainRoutes = {
     {
       path: '/CreateSale',
       element: <CreateSale />
+    },
+    {
+      path: '/SeasonalForecast',
+      element: <SeasonalForecasting />
     }
   ]
 };

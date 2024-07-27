@@ -88,17 +88,24 @@ export default function DashboardDefault() {
     }
 
     const totalStock = calculateTotalStockLevel();
-    console.log(totalStock)
     const averageStock = totalStock / productsData.length;
-    console.log(averageStock)
     const thresholdQuantity = averageStock * (reorderThresholdPercentage / 100);
-    console.log(thresholdQuantity)
     const riskyProducts = productsData.filter(product => product.quantity < thresholdQuantity);
-    console.log(riskyProducts)
+
+    // Use a Set to avoid repetitive product names
+    const processedProductNames = new Set();
+    const uniqueRiskyProducts = [];
+
+    riskyProducts.forEach(product => {
+        if (!processedProductNames.has(product.name)) {
+            processedProductNames.add(product.name);
+            uniqueRiskyProducts.push(product);
+        }
+    });
 
     // Constructing a string with names and counts
-    return riskyProducts.map(product => `${product.name}: ${product.quantity}`).join(', ');
-  };
+    return uniqueRiskyProducts.map(product => `${product.name}: ${product.quantity}`).join(', ');
+};
 
   const calculateReorderAlerts = () => {
     if (!productsData || productsData.length === 0) return 0;
