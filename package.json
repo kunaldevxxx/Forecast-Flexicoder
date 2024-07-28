@@ -2,7 +2,7 @@
   "name": "FlexiCoder",
   "version": "1.3.0",
   "private": true,
-  "homepage": "",
+  "homepage": ".",
   "scripts": {
     "start": "vite",
     "build": "vite build",
